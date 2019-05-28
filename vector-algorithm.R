@@ -77,7 +77,7 @@ for (variable in 1:length(separate)) {
 }
 
 final <- as.data.frame(final)
-
+colnames(final) <- vector$variable
 
 
 
