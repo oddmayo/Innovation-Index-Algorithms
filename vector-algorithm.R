@@ -47,34 +47,42 @@ final <- Reduce("+", result) / length(result)
 
 # List of all the variables
 separate <- as.list(strsplit(vector$questions, ";")) 
+final <- NULL
 
-for (question in 1:length(separate)) {
-  example <-  pivote[4:nrow(pivote), separate[[question]] ]
+for (variable in 1:length(separate)) {
+  example <-  pivote[4:nrow(pivote), separate[[variable]] ]
   
   # numeric pattern to separate questions of same variable
-  pattern <- unlist(stringi::stri_extract_all_regex(vector$questions[question],"[0-9]+") )
+  pattern <- unlist(stringi::stri_extract_all_regex(vector$questions[variable],"[0-9]+") )
+  
+  # store dataframes of questions in a list
+  container <-  sapply(unique(pattern),
+                       function(x) example[startsWith(names(example) , x )],
+                       simplify = FALSE)
+  
+  # convert character dataframes into numeric
+  container <- lapply(container, function(x) as.data.frame(sapply(x, as.numeric)))
+
+  # store means in list
+  result <- NULL
+  
+  for (dataframe in 1:length(container)) {
+    # sum of values of column per question / total of questions in this variable
+    result[[dataframe]] = ( rowSums(container[[dataframe]]) / ncol(container[[dataframe]]) )
+  }
+  
+  # final mean
+  final[[variable]] <- Reduce("+", result) / length(result)
   
 }
 
-pattern <- unlist(stringi::stri_extract_all_regex(vector$questions[1],"[0-9]+") )
+final <- as.data.frame(final)
 
 
 
-# store dataframes of questions in a list
-container <-  sapply(unique(pattern),
-                     function(x) example[startsWith(names(example) , x )],
-                     simplify = FALSE)
 
-# convert character dataframes into numeric
-container <- lapply(container, function(x) as.data.frame(sapply(x, as.numeric))) 
 
-# store means in list
-result <- NULL
-for (dataframe in 1:length(container)) {
-  # sum of values of column per question / total of questions in this variable
-  result[[dataframe]] = ( rowSums(container[[dataframe]]) / ncol(container[[dataframe]]) )
-}
 
-# final mean
-final <- Reduce("+", result) / length(result)
+
+
 
