@@ -72,7 +72,7 @@ for (variable in 1:length(separate)) {
   }
   
   # final mean
-  final[[variable]] <- Reduce("+", result) / length(result)
+  final[[variable]] <- ( Reduce("+", result) / length(result) )
   
 }
 
