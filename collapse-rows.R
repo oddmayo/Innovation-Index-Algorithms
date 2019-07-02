@@ -21,3 +21,17 @@ data3[] <- lapply(data3[2:ncol(data3)], rule)
 
 data_final <-  add_column(data3, data2$Group.1, .before = 1)
 colnames(data_final)[which(names(data_final) == "data2$Group.1")] <- "CODENT"
+
+
+sum(table(data$H01a))
+
+table(data$H02)
+table(data$H03a)
+table(data$H03b)
+table(data$H03d)
+table(data$H03e)
+table(data$H04i)
+table(data$H04a)
+
+mean(data$C01a)
+mean(data$C01e)
