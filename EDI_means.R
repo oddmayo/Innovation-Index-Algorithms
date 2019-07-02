@@ -18,3 +18,17 @@ EDI[EDI==9] <- NA
 
 # Mean per group
 EDI_means <- aggregate(EDI[, 1:ncol(EDI)], list(EDI$CODENT), mean, na.rm = T)
+
+# G02 case
+library(dplyr)
+
+G02_counts <-  G02 %>% 
+  group_by(CODENT, G02) %>%
+  tally()
+
+library(tidyr)
+
+G02_sums <-  xtabs(n~., G02_counts)
+
+# dplyr solution with data frame output
+G02_sums <-  spread(G02_counts, G02, n, fill=0)
