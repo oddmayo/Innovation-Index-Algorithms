@@ -32,3 +32,10 @@ G02_sums <-  xtabs(n~., G02_counts)
 
 # dplyr solution with data frame output
 G02_sums <-  spread(G02_counts, G02, n, fill=0)
+
+library(openxlsx)
+# Save EDI_means as xlsx
+openxlsx::write.xlsx(x = EDI_means, file = paste0(directory, "output/EDI_promedios.xlsx"))
+
+# Save G02_sums as xlsx
+openxlsx::write.xlsx(x = G02_sums, file = paste0(directory, "output/G02_sumas.xlsx"))
