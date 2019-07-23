@@ -13,8 +13,16 @@ G02 <- data.frame(CODENT = EDI$CODENT, G02 = EDI$G02)
 EDI$G02 <- NULL
 
 # Replace all '8' and '9' for NAs
-EDI[EDI==8] <- NA
-EDI[EDI==9] <- NA
+
+#EDI[EDI[,]==8] <- NA
+#EDI[EDI==9] <- NA
+
+# Replace it for second column onwards
+EDI[, 2:ncol(EDI)][EDI[, 2:ncol(EDI)] == 8] <- NA
+EDI[, 2:ncol(EDI)][EDI[, 2:ncol(EDI)] == 9] <- NA
+
+
+
 
 # Mean per group
 EDI_means <- aggregate(EDI[, 1:ncol(EDI)], list(EDI$CODENT), mean, na.rm = T)
