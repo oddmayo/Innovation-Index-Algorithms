@@ -32,3 +32,5 @@ row_temp <- unlist(strsplit(nested_EDI_1$qs[1],split = ';'))
 colums_temp <- EDI_global[,temp]
 # Means of the group
 new_col_temp <- rowMeans(colums_temp, na.rm=TRUE)
+
+
