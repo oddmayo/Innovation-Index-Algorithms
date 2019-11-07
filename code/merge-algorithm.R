@@ -5,66 +5,52 @@
 library(openxlsx)
 library(tidyverse)
 
-# Cargar datos esenciales
+# Data
 EDI <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/output/EDI_promedios.xlsx")
 equi <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/data/equivalencias.xlsx")
 pivote <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/data/pivote.xlsx")
 
-# Dejar columnas únicas
+# Unique columns
 equi <- equi[ , !duplicated(colnames(equi))]
 
-# Dejar solo las compatibles en la equivalencia
+# Only compatible entities
 equi <- equi %>% filter(Compatible == 1)
 
-#########################
-# # NOT YET
-# # Convertir primer fila en nombre de las colmnas
-# colnames(pivote) <- as.character(unlist(pivote[1,]))
-# pivote = pivote[-1, ]
-
-# Gurdar 3 primeras filas de pivote, pues al buscar los códigos coincidentes
-# se eliminan dichas filas
-
+# Store first 3 rows since these are deleted after matching the codes
 pivote_tres_filas <- pivote[1:3,]
 
-# Dejar en el pivote solo aquellas entidades que aparecen
-# en la tabla de equivalencias
-
+# Leave only entities that appear in equi data
 pivote_2 <- pivote %>% filter(pivote$X1 %in% equi$DAFP)
 
-# Pegar 3 filas a nuevo pivote
+# Restore the 3 rows deleted
 pivote_2 <- rbind(pivote_tres_filas,pivote_2)
 
-# Dejar  los datos de EDI que se encuentran también en la tabla
-# de equivalencias
-
+# Leave EDI data present in equi data
 EDI_2 <- EDI %>% filter(EDI$CODENT %in% equi$DANE)
 
-# Ordenar las filas de EDI_2 de acuerdo al orden de las entidades en
-# equivalencias
-
+# Order EDI data by equi data
 EDI_2 <- EDI_2[ order(match(EDI_2$CODENT, equi$DANE)), ]
 
-# Pegar promedios de EDI a equivalencias
+# Bind EDI means to equi data
 base <- cbind(equi, EDI_2)
 
-# Ordenar base de acuerdo al orden del código DAFP en pivote para luego pegar EDI
+# Order base according to DAFP code in pivote - so it can be pasted to EDI
 base <- base[ order(match(base$DAFP, pivote_2$X1)), ]
 
-# Eliminar columnas con info redundante o innecesaria
+# Delete columns with irrelevant data
 base <- base[,-c(2:6)]
 
-# Eliminar columna guía
+# Delete leading column
 base$DAFP <- NULL
 
-# Añadir 3 filas vacías a base para empatar con nuevo pivote
+# Add 3 empty rows to match row lenght
 x <- rep(NA, ncol(base))
 
-# Correr 3 veces esta línea
+# Run this 3 times
 base <- rbind(x, base)
 
-# Merge final
+# Final merge
 resultado <- cbind(pivote_2, base)
 
-# Exportar
+# Export
 #openxlsx::write.xlsx(x = resultado, file = "output/pivote_nuevo.xlsx")

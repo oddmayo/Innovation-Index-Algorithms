@@ -1,7 +1,7 @@
 require(readxl)
 library(stringi)
 # Work directory
-directory <- 'C:/Users/ScmayorquinS/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/'
+directory <- 'C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/'
 
 # Example variables vector
 vector <- readxl::read_excel(paste0(directory, 'example-vector.xlsx'),sheet = 'Sheet2',col_names = F)
@@ -16,7 +16,6 @@ pivote <- readxl::read_excel(paste0(directory, 'Pivote.xlsx'))
 
 # List of all the variables
 separate <- as.list(strsplit(vector$questions, ";")) 
-
 
 example <-  pivote[4:nrow(pivote), separate[[1]] ]
 
@@ -40,6 +39,7 @@ for (dataframe in 1:length(container)) {
 
 # final mean
 final <- Reduce("+", result) / length(result)
+final <- as.data.frame(final)
 
 #----------------------------------------------------------------------------------
 # For attempt
