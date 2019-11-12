@@ -1,12 +1,15 @@
 # PRIMER ALGORITMO
 
+directory <- 'C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/'
+
+
 #install.packages("openxlsx")
 #install.packages("tidyverse")
 library(openxlsx)
 library(tidyverse)
 
 # Data
-EDI <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/output/EDI_promedios.xlsx")
+EDI <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/output/EDI_promedios_normalizada.xlsx")
 equi <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/data/equivalencias.xlsx")
 pivote <- openxlsx::read.xlsx("C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms/data/pivote.xlsx")
 
@@ -53,4 +56,4 @@ base <- rbind(x, base)
 resultado <- cbind(pivote_2, base)
 
 # Export
-#openxlsx::write.xlsx(x = resultado, file = "output/pivote_nuevo.xlsx")
+openxlsx::write.xlsx(x = resultado, file = paste0(directory,"output/pivote_nuevo.xlsx") )
