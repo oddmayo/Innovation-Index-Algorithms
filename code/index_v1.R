@@ -20,11 +20,16 @@ global[] <- lapply(global, function(x) as.numeric(as.character(x)))
 # Data with nested groups, which will be averaged
 EDI_dir <- paste0(directory, '/data/ICIP_V22.xlsx')
 
+# Entities names
+names <- read.xlsx(paste0(directory, '/output/pivote_nuevo.xlsx'))
+names <- names[-c(1:3),1:2]
+colnames(names) <- c('código','entidad')
+
 #-----------------#
 # First dimension #
 #-----------------#
 
-EDI_1 <- read.xlsx(xlsxFile = EDI_dir, sheet = 1,fillMergedCells = T)
+EDI_1 <- read.xlsx(xlsxFile = EDI_dir, sheet = 3,fillMergedCells = T)
 
 # Test
 EDI_1$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI_1$`#.pregunta.pivote`)
@@ -33,16 +38,16 @@ EDI_1$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI_1$`#.pregunta.pivote`)
 nested_EDI_1 <- data.frame(code=EDI_1$Codigo,stringsAsFactors = F, qs=EDI_1$`#.pregunta.pivote`)
 
 # Obtain row of questions
-row_temp <- unlist(strsplit(nested_EDI_1$qs[1],split = ';'))
+row_temp <- unlist(strsplit(nested_EDI_1$qs[9],split = ';'))
+row_temp <-  row_temp[row_temp != ""]
 # Match column names of global to ieth row
 colums_temp <- global[,row_temp]
-# Means of the group
+
 if ( is.data.frame(colums_temp) ) {
   new_col_temp <- rowMeans(colums_temp, na.rm=TRUE)
 } else {
   new_col_temp <- as.numeric(colums_temp)
-  }
-  
+}
 
 
 container <- c()
@@ -61,8 +66,89 @@ for (i in 1:nrow(nested_EDI_1)) {
   container[[i]] <- new_col_temp
 }
 
-new_nested_EDI_1 <- nested_EDI_1
-new_nested_EDI_1$means <- container
 
-new_nested_EDI_1$means[1]
+test <-  as.data.frame(t(do.call(cbind, container)))
+test[test=="NaN"] <- NA
+test <- as.matrix(test)
+
+rownames(test) <- nested_EDI_1$code
+library(analytics)
+group_means <-  rowmean(test,group = rownames(test),na_rm = T)
+group_means_to_save <- t(group_means)
+group_means_to_save <- cbind(names, group_means_to_save)
+names(group_means_to_save) <- gsub("[[:digit:]]", "", names(group_means_to_save) )
+
+group_means_2 <- data.frame(promedio = colMeans(group_means))
+group_means_to_save_2 <- cbind(names, group_means_2)
+
+
+# Empty lists to save info
+to_save = c()
+to_save_2 = c()
+
+# Empty list to keep important objects
+to_keep = c()
+
+# For the 4 pilars
+
+for (pilar in 1:4) {
+  
+  EDI <- read.xlsx(xlsxFile = EDI_dir, sheet = pilar, fillMergedCells = T)
+  
+  # Test
+  EDI$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI$`#.pregunta.pivote`)
+  
+  # store each question with its code
+  nested_EDI <- data.frame(code = EDI$Codigo,stringsAsFactors = F, qs=EDI$`#.pregunta.pivote`)
+  
+  container <- c()
+  for (i in 1:nrow(nested_EDI)) {
+    # Obtain row of questions
+    row_temp <- unlist(strsplit(nested_EDI$qs[i],split = ';'))
+    row_temp <-  row_temp[row_temp != ""]
+    # Match column names of global to ieth row
+    colums_temp <- global[,row_temp]
+    # Means of the group
+    if ( is.data.frame(colums_temp) ) {
+      new_col_temp <- rowMeans(colums_temp, na.rm=TRUE)
+    } else {
+      new_col_temp <- as.numeric(colums_temp)
+    }
+    
+    container[[i]] <- new_col_temp
+  }
+  
+  # Convert list to dataframe
+  test <-  as.data.frame(t(do.call(cbind, container)))
+  test[test=="NaN"] <- NA
+  test <- as.matrix(test)
+  rownames(test) <- nested_EDI$code
+  
+  # Row means per group
+  library(analytics)
+  group_means <-  rowmean(test,group = rownames(test),na_rm = T)
+  group_means_to_save <- t(group_means)
+  group_means_to_save <- cbind(names, group_means_to_save)
+  #names(group_means_to_save) <- gsub("[[:digit:]]", "", names(group_means_to_save) )
+  
+  # Total row means
+  group_means_2 <- data.frame(promedio = colMeans(group_means))
+  group_means_to_save_2 <- cbind(names, group_means_2)
+  
+  # Saving info
+  to_save[[pilar]] <- group_means_to_save
+  to_save_2[[pilar]] <- group_means_to_save_2
+  
+  # Important object for last computation
+  to_keep[[pilar]] <- group_means_2
+  
+  
+  
+}
+
+library(rlist)
+
+almost_final_df <- list.cbind(to_keep)
+final_df <- data.frame("índice" = rowMeans(almost_final_df))
+final_df <- cbind(names, final_df)
 
