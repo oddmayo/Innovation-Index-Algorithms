@@ -29,7 +29,7 @@ colnames(names) <- c('código','entidad')
 # First dimension #
 #-----------------#
 
-EDI_1 <- read.xlsx(xlsxFile = EDI_dir, sheet = 3,fillMergedCells = T)
+EDI_1 <- read.xlsx(xlsxFile = EDI_dir, sheet = 2,fillMergedCells = T)
 
 # Test
 EDI_1$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI_1$`#.pregunta.pivote`)
@@ -38,13 +38,20 @@ EDI_1$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI_1$`#.pregunta.pivote`)
 nested_EDI_1 <- data.frame(code=EDI_1$Codigo,stringsAsFactors = F, qs=EDI_1$`#.pregunta.pivote`)
 
 # Obtain row of questions
-row_temp <- unlist(strsplit(nested_EDI_1$qs[9],split = ';'))
+row_temp <- unlist(strsplit(nested_EDI_1$qs[19],split = ';'))
 row_temp <-  row_temp[row_temp != ""]
 # Match column names of global to ieth row
 colums_temp <- global[,row_temp]
 
 if ( is.data.frame(colums_temp) ) {
-  new_col_temp <- rowMeans(colums_temp, na.rm=TRUE)
+  if (all(names(colums_temp) == case_1)) {
+    new_col_temp <- rowSums(sweep(colums_temp, 2, vector_1, "*"),na.rm = T)
+  }
+  else {
+    new_col_temp <- rowMeans(colums_temp, na.rm=TRUE)
+  }
+  
+  
 } else {
   new_col_temp <- as.numeric(colums_temp)
 }
@@ -152,3 +159,15 @@ almost_final_df <- list.cbind(to_keep)
 final_df <- data.frame("índice" = rowMeans(almost_final_df))
 final_df <- cbind(names, final_df)
 
+
+
+
+# Special cases
+case_1 <-  c('I31A','I31B','I31C','I31D','I31E')
+vector_1 <- c(1,0.75,0.5,0.25,0)
+
+case_2 <- c('')
+
+
+
+rowSums(sweep(colums_temp, 2, vector_1, "*"),na.rm = T)
