@@ -47,10 +47,13 @@ if ( is.data.frame(colums_temp) ) {
   if (all(names(colums_temp) == case_1)) {
     new_col_temp <- rowSums(sweep(colums_temp, 2, vector_1, "*"),na.rm = T)
   }
+  else if (all(names(colums_temp) == case_2)) {
+    colums_temp$`115F` <- 
+  }
+  
   else {
     new_col_temp <- rowMeans(colums_temp, na.rm=TRUE)
   }
-  
   
 } else {
   new_col_temp <- as.numeric(colums_temp)
@@ -166,7 +169,7 @@ final_df <- cbind(names, final_df)
 case_1 <-  c('I31A','I31B','I31C','I31D','I31E')
 vector_1 <- c(1,0.75,0.5,0.25,0)
 
-case_2 <- c('')
+case_2 <- c("115A", "115B", "115C", "115D", "115E", "115F")
 
 
 
