@@ -78,7 +78,7 @@ if ( is.data.frame(colums_temp) ) {
   }
   
 } else {
-  if (all(names(row_temp) == case_5)) {
+  if (row_temp == case_5) {
     case_5.1 <- colums_temp - 1
     new_col_temp <- as.numeric(case_5.1)
   }else{
@@ -196,7 +196,7 @@ for (pilar in 1:4) {
       }
       
     } else {
-      if (all(names(row_temp) == case_5)) {
+      if (row_temp == case_5) {
         case_5.1 <- 1- colums_temp
         new_col_temp <- as.numeric(case_5.1)
       }else{
