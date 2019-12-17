@@ -9,13 +9,22 @@ library(rstudioapi)
 directory <-  "C:/Users/LcmayorquinL/OneDrive - Departamento Nacional de Planeacion/DIDE/2019/Data Science Projects/Innovation-Index-Algorithms"
 
 # We neede to look for the values in these columns
-global <- read.xlsx(paste0(directory, '/output/pivote_nuevo.xlsx'))
+global <- read.xlsx(paste0(directory, '/data/Pivote NAC Version25.xlsx'))
 
 # Delete first 3 rows
 global <- global[-c(1:3),]
+# Delete last row
+global <- global[-nrow(global),]
 
 # Convert character types to numeric
-global[] <- lapply(global, function(x) as.numeric(as.character(x)))
+global[,2:ncol(global)] <- lapply(global[,2:ncol(global)], function(x) as.numeric(as.character(x)))
+
+# Chosen entities
+chosen <- read.xlsx(paste0(directory, '/data/entidades_escogidas.xlsx'))
+
+# Filter global by chosen entities
+library(data.table)
+global2 <- setDT(global)[X1 %in% chosen$Code]
 
 # Data with nested groups, which will be averaged
 EDI_dir <- paste0(directory, '/data/ICIP_V25.xlsx')
@@ -25,11 +34,14 @@ names <- read.xlsx(paste0(directory, '/output/pivote_nuevo.xlsx'))
 names <- names[-c(1:3),1:2]
 colnames(names) <- c('código','entidad')
 
+names <-  names %>% filter(names$código %in% chosen$Code)
+names <- names[match(chosen$Code, names$código),]
+
 #-----------------#
 # First dimension #
 #-----------------#
 
-EDI_1 <- read.xlsx(xlsxFile = EDI_dir, sheet = 3,fillMergedCells = T)
+EDI_1 <- read.xlsx(xlsxFile = EDI_dir, sheet = 2,fillMergedCells = T)
 
 # Test
 EDI_1$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI_1$`#.pregunta.pivote`)
@@ -38,16 +50,16 @@ EDI_1$`#.pregunta.pivote` <-  gsub(pattern = '\n', '',EDI_1$`#.pregunta.pivote`)
 nested_EDI_1 <- data.frame(code=EDI_1$Codigo,stringsAsFactors = F, qs=EDI_1$`#.pregunta.pivote`)
 
 # Obtain row of questions
-row_temp <- unlist(strsplit(nested_EDI_1$qs[2],split = ';'))
+row_temp <- unlist(strsplit(nested_EDI_1$qs[19],split = ';'))
 row_temp <-  row_temp[row_temp != ""]
 # Match column names of global to ieth row
 colums_temp <- global[,row_temp]
 
 if ( is.data.frame(colums_temp) ) {
-  if (all(names(colums_temp) == case_1)) {
-    new_col_temp <- rowSums(sweep(colums_temp, 2, vector_1, "*"),na.rm = T)
+  if (all(names(colums_temp) == case_2)) {
+    new_col_temp <- rowSums(sweep(colums_temp, 2, vector_2, "*"),na.rm = T)
   }
-  else if (all(names(colums_temp) == case_2)) {
+  else if (all(names(colums_temp) == case_1)) {
     colums_temp$`115E`[is.na(colums_temp$`115E`)] <- 0
     colums_temp$`115D`[is.na(colums_temp$`115D`)] <- 0
     SUB_115CA <- colums_temp$`115C` / colums_temp$`115A`
@@ -79,7 +91,7 @@ if ( is.data.frame(colums_temp) ) {
   
 } else {
   if (row_temp == case_5) {
-    case_5.1 <- colums_temp - 1
+    case_5.1 <- (1 - colums_temp)
     new_col_temp <- as.numeric(case_5.1)
   }else{
     new_col_temp <- as.numeric(colums_temp)
@@ -120,18 +132,11 @@ group_means_2 <- data.frame(promedio = colMeans(group_means))
 group_means_to_save_2 <- cbind(names, group_means_2)
 
 
-# Empty lists to save info
-to_save = c()
-to_save_2 = c()
-
-# Empty list to keep important objects
-to_keep = c()
-
 # Special cases
-case_1 <-  c('I31A','I31B','I31C','I31D','I31E')
-vector_1 <- c(1,0.75,0.5,0.25,0)
+case_1 <- c("115A", "115B", "115C", "115D", "115E")
 
-case_2 <- c("115A", "115B", "115C", "115D", "115E", "115F")
+case_2 <-  c('I31A','I31B','I31C','I31D','I31E')
+vector_2 <- c(1,0.75,0.5,0.25,0)
 
 case_3 <- c("3C1","3C2","3D1","3D2","3E1","3E2","3F1","3F2","3G1","3G2","3H1","3H2")
 vector_3 <- c(1,0.5,1,0.5,1,0.5,1,0.5,1,0.5,1,0.5)
@@ -140,6 +145,13 @@ case_4 <- c("3A1","3A2","3C1","3C2","3H1","3H2")
 vector_4 <- c(1,0.5,1,0.5,1,0.5)
 
 case_5 <- "334B"
+
+# Empty lists to save info
+to_save = c()
+to_save_2 = c()
+
+# Empty list to keep important objects
+to_keep = c()
 
 # For the 4 pilars
 
@@ -162,10 +174,10 @@ for (pilar in 1:4) {
     colums_temp <- global[,row_temp]
     # Means of the group
     if ( is.data.frame(colums_temp) ) {
-      if (all(names(colums_temp) == case_1)) {
-        new_col_temp <- rowSums(sweep(colums_temp, 2, vector_1, "*"),na.rm = T)
+      if (all(names(colums_temp) == case_2)) {
+        new_col_temp <- rowSums(sweep(colums_temp, 2, vector_2, "*"),na.rm = T)
       }
-      else if (all(names(colums_temp) == case_2)) {
+      else if (all(names(colums_temp) == case_1)) {
         colums_temp$`115E`[is.na(colums_temp$`115E`)] <- 0
         colums_temp$`115D`[is.na(colums_temp$`115D`)] <- 0
         SUB_115CA <- colums_temp$`115C` / colums_temp$`115A`
@@ -197,7 +209,7 @@ for (pilar in 1:4) {
       
     } else {
       if (row_temp == case_5) {
-        case_5.1 <- 1- colums_temp
+        case_5.1 <- (1 - colums_temp)
         new_col_temp <- as.numeric(case_5.1)
       }else{
         new_col_temp <- as.numeric(colums_temp)
@@ -239,5 +251,12 @@ library(rlist)
 almost_final_df <- list.cbind(to_keep)
 final_df <- data.frame("índice" = rowMeans(almost_final_df))
 final_df <- cbind(names, final_df)
+
+
+# Pilares
+pilar_1 <- to_save_2[[1]]
+pilar_2 <- to_save_2[[2]]
+pilar_3 <- to_save_2[[3]]
+pilar_4 <- to_save_2[[4]]
 
 
