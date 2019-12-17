@@ -253,10 +253,12 @@ final_df <- data.frame("índice" = rowMeans(almost_final_df))
 final_df <- cbind(names, final_df)
 
 
-# Pilares
+# Pilars
 pilar_1 <- to_save_2[[1]]
 pilar_2 <- to_save_2[[2]]
 pilar_3 <- to_save_2[[3]]
 pilar_4 <- to_save_2[[4]]
 
-
+# Dimensions
+matriz <- cbind(to_save[[1]],to_save[[2]],to_save[[3]],to_save[[4]])
+matriz <- matriz[, !duplicated(colnames(matriz), fromLast = F)]
